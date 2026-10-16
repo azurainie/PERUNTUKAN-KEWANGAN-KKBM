@@ -176,6 +176,49 @@
   </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════
+     SKRIN LOGIN
+══════════════════════════════════════════ -->
+<div id="login-screen" style="
+  position:fixed;inset:0;z-index:9999;
+  background:#f0f2f5;
+  display:flex;align-items:center;justify-content:center;
+">
+  <div style="
+    background:#fff;border:1px solid #e5e7eb;border-radius:14px;
+    padding:36px 40px;width:100%;max-width:380px;text-align:center;
+    box-shadow:0 4px 24px rgba(0,0,0,.08);
+  ">
+    <div style="font-size:32px;margin-bottom:10px;">🔒</div>
+    <h2 style="font-size:17px;font-weight:700;margin-bottom:4px;">Dashboard Peruntukan Kewangan</h2>
+    <p style="font-size:12px;color:#57606a;margin-bottom:24px;">Kolej Komuniti Bukit Mertajam<br>Sila masukkan kata laluan untuk meneruskan.</p>
+
+    <input
+      type="password"
+      id="login-pass"
+      placeholder="Kata Laluan"
+      style="
+        width:100%;border:1px solid #e5e7eb;border-radius:7px;
+        padding:10px 14px;font-size:14px;font-family:inherit;
+        margin-bottom:10px;outline:none;
+      "
+      onkeydown="if(event.key==='Enter') doLogin();"
+    />
+    <div id="login-err" style="font-size:12px;color:#dc2626;min-height:18px;margin-bottom:8px;"></div>
+    <button
+      onclick="doLogin()"
+      style="
+        width:100%;background:#2563eb;color:#fff;border:none;
+        border-radius:7px;padding:10px;font-size:14px;font-weight:600;
+        cursor:pointer;font-family:inherit;
+      "
+    >Masuk</button>
+    <p style="font-size:11px;color:#57606a;margin-top:16px;">Hubungi pentadbir untuk mendapatkan kata laluan.</p>
+  </div>
+</div>
+
+<div id="main-content" style="display:none;">
 <div class="wrap">
 
   <!-- ── CSV Toolbar ── -->
@@ -693,6 +736,7 @@
 
   <footer>Dashboard Peruntukan Kewangan Kolej Komuniti Bukit Mertajam — Dibina dengan IBM Bob</footer>
 </div>
+</div><!-- /main-content -->
 
 <script>
   // Tarikh hari ini
@@ -935,6 +979,30 @@
     });
     updateSummary();
   })();
+</script>
+
+<script>
+  // ══════════════════════════════════════════
+  // LOGIN — tukar nilai PASSWORDS di bawah
+  // ══════════════════════════════════════════
+  // Senarai kata laluan yang dibenarkan — tambah atau buang mengikut keperluan
+  var PASSWORDS = ["kkbm2025"];
+
+  // Setiap kali link dibuka, login screen akan muncul dahulu.
+  // Tiada session disimpan — pengguna MESTI login setiap kali buka link.
+  function doLogin() {
+    var val = document.getElementById("login-pass").value;
+    var err = document.getElementById("login-err");
+    if (PASSWORDS.indexOf(val) !== -1) {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("main-content").style.display = "block";
+      err.textContent = "";
+    } else {
+      err.textContent = "⚠ Kata laluan salah. Cuba semula.";
+      document.getElementById("login-pass").value = "";
+      document.getElementById("login-pass").focus();
+    }
+  }
 </script>
 </body>
 </html>
