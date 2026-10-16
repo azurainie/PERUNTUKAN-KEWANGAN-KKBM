@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Peruntukan Kewangan Kolej Komuniti Bukit Mertajam</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:   #2563eb;
+      --green:  #16a34a;
+      --yellow: #d97706;
+      --red:    #dc2626;
+      --border: #e5e7eb;
+      --bg:     #f0f2f5;
+      --gray:   #57606a;
+    }
+
+    body {
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg); color: #1f2328;
+      padding: 28px 20px; font-size: 14px;
+    }
+
+    .wrap { max-width: 1150px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; padding: 22px 24px;
+      margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .header h1 { font-size: 20px; font-weight: 700; }
+    .header p  { font-size: 12px; color: var(--gray); margin-top: 3px; }
+    .tarikh-box {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+      font-size: 13px; color: var(--gray);
+    }
+    .tarikh-row {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tarikh-box input, .tarikh-box select {
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 5px 10px; font-size: 13px; color: #1f2328;
+    }
+
+    /* ── Summary Cards ── */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 24px;
+    }
+    .scard {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px;
+    }
+    .scard-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .5px; color: var(--gray); margin-bottom: 8px;
+    }
+    .scard-value { font-size: 24px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .scard-sub   { font-size: 12px; color: var(--gray); }
+    .c-blue   { color: var(--blue); }
+    .c-yellow { color: var(--yellow); }
+    .c-green  { color: var(--green); }
+    .c-red    { color: var(--red); }
+
+    /* ── OA Group ── */
+    .oa-group { margin-bottom: 24px; }
+    .oa-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .5px; color: var(--gray);
+      padding-bottom: 8px; margin-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .oa-title span {
+      background: #1f2328; color: #fff;
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+    }
+
+    /* ── Table ── */
+    .tbl-wrap {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
+    thead th {
+      background: #f7f8fa; padding: 10px 12px;
+      font-weight: 600; font-size: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left; white-space: nowrap;
+    }
+    thead th.r { text-align: right; }
+    tbody td {
+      padding: 9px 12px; border-bottom: 1px solid #f0f2f5;
+      vertical-align: middle;
+    }
+    tbody td.r { text-align: right; font-variant-numeric: tabular-nums; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #fafafa; }
+
+    .os-code { font-weight: 700; color: var(--blue); white-space: nowrap; }
+
+    /* Progress */
+    .prog-wrap { min-width: 90px; }
+    .prog-pct  { font-size: 11px; color: var(--gray); }
+    .prog-bar  { height: 5px; background: #e5e7eb; border-radius: 99px; overflow: hidden; margin-top: 3px; }
+    .prog-fill { height: 100%; border-radius: 99px; transition: width .3s; }
+    .safe    { background: var(--green); }
+    .warning { background: var(--yellow); }
+    .danger  { background: var(--red); }
+
+    /* Badge */
+    .badge {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 99px; white-space: nowrap;
+    }
+    .badge.safe    { background: #dcfce7; color: #15803d; }
+    .badge.warning { background: #fef9c3; color: #a16207; }
+    .badge.danger  { background: #fee2e2; color: #b91c1c; }
+
+    /* Inputs */
+    .num-input {
+      width: 120px; border: 1px solid var(--border);
+      border-radius: 5px; padding: 4px 8px;
+      font-size: 13px; text-align: right; font-family: inherit;
+    }
+    .num-input:focus { outline: none; border-color: var(--blue); }
+    .txt-input {
+      width: 100%; border: 1px solid var(--border);
+      border-radius: 5px; padding: 4px 8px;
+      font-size: 12px; font-family: inherit;
+    }
+    .txt-input:focus { outline: none; border-color: var(--blue); }
+
+    /* Footer row */
+    tfoot td {
+      padding: 10px 12px; font-weight: 700;
+      background: #f7f8fa; border-top: 2px solid var(--border);
+      font-size: 13px;
+    }
+    tfoot td.r { text-align: right; font-variant-numeric: tabular-nums; }
+
+    footer {
+      text-align: center; font-size: 12px; color: var(--gray);
+      border-top: 1px solid var(--border); padding-top: 14px; margin-top: 8px;
+    }
+
+    /* ── CSV Toolbar ── */
+    .csv-bar {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 18px;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .csv-bar span { font-size: 13px; font-weight: 600; margin-right: 4px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 6px; font-size: 13px;
+      font-weight: 600; cursor: pointer; border: 1px solid transparent;
+      font-family: inherit; transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-outline { background: #fff; color: #1f2328; border-color: var(--border); }
+    .btn-green   { background: var(--green); color: #fff; }
+    #csv-status {
+      font-size: 12px; color: var(--green); font-weight: 600;
+      display: none;
+    }
+    #csv-status.error { color: var(--red); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ── CSV Toolbar ── -->
+  <div class="csv-bar">
+    <span>📂 Data CSV:</span>
+
+    <!-- Muat naik CSV -->
+    <label class="btn btn-primary" title="Pilih fail CSV untuk import data">
+      ⬆ Import CSV
+      <input type="file" id="csv-file-input" accept=".csv" style="display:none"/>
+    </label>
+
+    <!-- Eksport CSV -->
+    <button class="btn btn-green" id="btn-eksport">⬇ Eksport CSV</button>
+
+    <!-- Muat turun template -->
+    <button class="btn btn-outline" id="btn-template">📄 Muat Turun Template</button>
+
+    <span id="csv-status"></span>
+  </div>
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <div>
+      <h1>📊 Dashboard Peruntukan Kewangan Kolej Komuniti Bukit Mertajam</h1>
+      <p>Kolej Komuniti Bukit Mertajam — Pengurusan Peruntukan &amp; Perbelanjaan Mengikut Kod OS</p>
+    </div>
+    <div class="tarikh-box">
+      <div class="tarikh-row">📅 Setakat: <input type="date" id="tarikh-setakat"/></div>
+      <div class="tarikh-row">
+        📋 Sukuan:
+        <select id="sukuan">
+          <option value="">— Pilih Sukuan —</option>
+          <option value="S1">Sukuan 1 (Jan – Mac)</option>
+          <option value="S2">Sukuan 2 (Apr – Jun)</option>
+          <option value="S3">Sukuan 3 (Jul – Sep)</option>
+          <option value="S4">Sukuan 4 (Okt – Dis)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Summary Cards ── -->
+  <div class="summary">
+    <div class="scard">
+      <div class="scard-label">Jumlah Peruntukan</div>
+      <div class="scard-value c-blue" id="sum-peruntukan">RM 0.00</div>
+      <div class="scard-sub">Keseluruhan semua OA</div>
+    </div>
+    <div class="scard">
+      <div class="scard-label">Jumlah Digunakan</div>
+      <div class="scard-value c-yellow" id="sum-diguna">RM 0.00</div>
+      <div class="scard-sub">Perbelanjaan terkini</div>
+    </div>
+    <div class="scard">
+      <div class="scard-label">Baki Peruntukan</div>
+      <div class="scard-value c-green" id="sum-baki">RM 0.00</div>
+      <div class="scard-sub">Baki yang tinggal</div>
+    </div>
+    <div class="scard">
+      <div class="scard-label">% Penggunaan</div>
+      <div class="scard-value c-green" id="sum-pct">0.0%</div>
+      <div class="scard-sub">Daripada jumlah peruntukan</div>
+    </div>
+  </div>
+
+  <!-- ── Carta Donut ── -->
+  <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:22px 24px;margin-bottom:24px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;">
+    <div style="flex:0 0 auto;">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);margin-bottom:14px;">Carta Agihan Peruntukan</div>
+      <svg id="donut-svg" viewBox="0 0 200 200" width="200" height="200" style="display:block;">
+        <!-- Segmen diisi oleh JS -->
+        <circle id="donut-bg" cx="100" cy="100" r="70" fill="none" stroke="#e5e7eb" stroke-width="32"/>
+        <circle id="donut-diguna" cx="100" cy="100" r="70" fill="none" stroke="#d97706" stroke-width="32"
+          stroke-dasharray="0 440" stroke-dashoffset="110" stroke-linecap="butt"
+          style="transition:stroke-dasharray .6s ease;"/>
+        <circle id="donut-baki" cx="100" cy="100" r="70" fill="none" stroke="#16a34a" stroke-width="32"
+          stroke-dasharray="0 440" stroke-dashoffset="110" stroke-linecap="butt"
+          style="transition:stroke-dasharray .6s ease;"/>
+        <text x="100" y="95" text-anchor="middle" font-size="22" font-weight="700" fill="#1f2328" id="donut-pct-text">86.2%</text>
+        <text x="100" y="115" text-anchor="middle" font-size="11" fill="#57606a">Digunakan</text>
+      </svg>
+    </div>
+    <div style="flex:1;min-width:200px;">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);margin-bottom:14px;">Pecahan Peruntukan</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:14px;height:14px;border-radius:3px;background:#d97706;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">Jumlah Digunakan</div>
+            <div style="font-size:12px;color:var(--gray);" id="legend-diguna">RM 2,552,998.82 (86.2%)</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:14px;height:14px;border-radius:3px;background:#16a34a;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">Baki Peruntukan</div>
+            <div style="font-size:12px;color:var(--gray);" id="legend-baki">RM 450,392.91 (13.8%)</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:14px;height:14px;border-radius:3px;background:#2563eb;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">Jumlah Peruntukan</div>
+            <div style="font-size:12px;color:var(--gray);" id="legend-peruntukan">RM 2,963,391.73</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       OA 10000 — Emolumen
+  ═════════════════════════════════════════════ -->
+  <div class="oa-group">
+    <div class="oa-title"><span>OA 10000</span> Emolumen</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kod OS</th>
+            <th>Kategori</th>
+            <th class="r">Peruntukan (RM)</th>
+            <th class="r">Digunakan (RM)</th>
+            <th class="r">Baki (RM)</th>
+            <th>% Guna</th>
+            <th>Status</th>
+            <th>Perkara / Perolehan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="os-code">OS 11000</td>
+            <td>Gaji dan Upahan</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="1645820" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="1316672.54" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Gaji pokok pensyarah &amp; staf sokongan jawatan tetap"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 12000</td>
+            <td>Elaun &amp; Imbuhan Tetap</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="291900" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="242290.07" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="ITKA, ITP, COLA, elaun pemangkuan/jawatan"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 13000</td>
+            <td>Sumbangan Berkanun</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="0" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="0" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Caruman KWSP &amp; PERKESO bahagian majikan"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 14000</td>
+            <td>Bayaran Lebih Masa (OT)</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="14000" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="13183.98" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="OT staf sokongan &amp; teknikal"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 15000</td>
+            <td>Faedah Kewangan Lain</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="3374" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="3374" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="BKK, pelarasan gaji, bonus tahunan"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 17000</td>
+            <td>Bayaran Balik / Potongan</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="0" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="12500" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Bayaran balik / potongan emolumen"/></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">Jumlah OA 10000</td>
+            <td class="r tf-p">RM 0.00</td>
+            <td class="r tf-d">RM 0.00</td>
+            <td class="r tf-b">RM 0.00</td>
+            <td colspan="3"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       OA 20000 — Perkhidmatan & Bekalan
+  ═════════════════════════════════════════════ -->
+  <div class="oa-group">
+    <div class="oa-title"><span>OA 20000</span> Perkhidmatan &amp; Bekalan</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kod OS</th><th>Kategori</th>
+            <th class="r">Peruntukan (RM)</th><th class="r">Digunakan (RM)</th>
+            <th class="r">Baki (RM)</th><th>% Guna</th><th>Status</th>
+            <th>Perkara / Perolehan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="os-code">OS 21000</td><td>Perjalanan &amp; Sara Hidup</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="38000" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="33321.43" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Tuntutan perbatuan/tambang LI, mesyuarat luar"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 22000</td><td>Pengangkutan Barang</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="924" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="924" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Penghantaran mesin, jentera &amp; peralatan makmal"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 23000</td><td>Perhubungan &amp; Utiliti</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="50000" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="44584.15" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Elektrik, air, internet, telefon, pos &amp; kurier"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 24000</td><td>Sewaan</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="212100" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="208271" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Sewa premis, bas pelajar, mesin fotostat"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 25000</td><td>Bahan Makanan &amp; Minuman</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="1000" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="999.90" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Bahan amali Kulinari, makanan asrama, keraian rasmi"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 26000</td><td>Bekalan Bahan Mentah &amp; Penyelenggaraan</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="10000" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="10866.78" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Alat tulis, kertas A4, toner, consumables amali"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 27000</td><td>Bekalan &amp; Bahan Lain</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="127000" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="116661.75" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Aset bernilai rendah (&lt;RM2,000), peralatan keselamatan"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 28000</td><td>Penyelenggaraan &amp; Pembaikan Kecil</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="130477" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="130477" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Penyelenggaraan bangunan, AC, lif, kenderaan, makmal"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 29100</td><td>Perkhidmatan Kawalan &amp; Kebersihan</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="0" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="0" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Kontrak keselamatan &amp; pembersihan kampus"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 29300</td><td>Pekerja Sambilan Harian (PSH)</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="0" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="0" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Upah PSH, pensyarah sambilan"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 29400</td><td>Perkhidmatan Lain / Honorarium</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="0" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="0" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Elaun penceramah jemputan, pemeriksa luar, juri"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 29000</td><td>Perkhidmatan Am Lain</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="201564.73" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="181660.22" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Perkhidmatan am &amp; kontrak lain"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 39000</td><td>Perbelanjaan Lain-lain (Aset)</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="432" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="432" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Perbelanjaan lain-lain berkaitan aset"/></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">Jumlah OA 20000</td>
+            <td class="r tf-p">RM 0.00</td><td class="r tf-d">RM 0.00</td>
+            <td class="r tf-b">RM 0.00</td><td colspan="3"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       OA 30000 — Aset
+  ═════════════════════════════════════════════ -->
+  <div class="oa-group">
+    <div class="oa-title"><span>OA 30000</span> Aset</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kod OS</th><th>Kategori</th>
+            <th class="r">Peruntukan (RM)</th><th class="r">Digunakan (RM)</th>
+            <th class="r">Baki (RM)</th><th>% Guna</th><th>Status</th>
+            <th>Perkara / Perolehan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="os-code">OS 32000</td><td>Bangunan &amp; Kemajuan Bangunan</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="0" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="0" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Naik taraf makmal, ubah suai ruang kampus"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 33000</td><td>Kemudahan Awam / Infrastruktur</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="0" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="0" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Pagar kampus, lampu jalan, fasiliti sukan/dewan"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 34000</td><td>Kenderaan &amp; Jentera</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="0" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="0" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Bas, van kampus, jentera berat latihan amali"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">OS 35000</td><td>Harta Modal / Kelengkapan</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="15500" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="15500" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="Jentera bengkel, server, komputer, perabot (≥RM2,000)"/></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">Jumlah OA 30000</td>
+            <td class="r tf-p">RM 0.00</td><td class="r tf-d">RM 0.00</td>
+            <td class="r tf-b">RM 0.00</td><td colspan="3"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       OA 40000 — Pemberian & Bayaran Tetap
+  ═════════════════════════════════════════════ -->
+  <div class="oa-group">
+    <div class="oa-title"><span>OA 40000</span> Pemberian &amp; Bayaran Tetap</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kod OS</th><th>Kategori</th>
+            <th class="r">Peruntukan (RM)</th><th class="r">Digunakan (RM)</th>
+            <th class="r">Baki (RM)</th><th>% Guna</th><th>Status</th>
+            <th>Perkara / Perolehan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="os-code">OS 42000</td><td>Pemberian Dalam Negeri</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="81620" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="41600" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" placeholder="BKPKK, BKOKU, elaun Latihan Industri pelajar"/></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">Jumlah OA 40000</td>
+            <td class="r tf-p">RM 0.00</td><td class="r tf-d">RM 0.00</td>
+            <td class="r tf-b">RM 0.00</td><td colspan="3"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       P64 — Projek Khas / Peruntukan Khusus
+  ═════════════════════════════════════════════ -->
+  <div class="oa-group">
+    <div class="oa-title"><span>P64</span> Projek Khas / Peruntukan Khusus</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kod Aktiviti</th><th>Kategori</th>
+            <th class="r">Peruntukan (RM)</th><th class="r">Digunakan (RM)</th>
+            <th class="r">Baki (RM)</th><th>% Guna</th><th>Status</th>
+            <th>Perkara / Perolehan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="os-code">P64 / 05012</td><td>Projek Khas 050120125030</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="67200" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="67200" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" value="Projek P64 Kod 050120125030"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">P64 / 00400</td><td>Projek Khas 004000322025</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="15480" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="15480" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" value="Projek P64 Kod 004000322025"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">P64 / 04800</td><td>Projek Khas 048000052026</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="21000" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="21000" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" value="Projek P64 Kod 048000052026"/></td>
+          </tr>
+          <tr>
+            <td class="os-code">P64 / 05018</td><td>Projek Khas 050180012026</td>
+            <td class="r"><input class="num-input inp-p" type="number" value="78000" min="0" step="100"/></td>
+            <td class="r"><input class="num-input inp-d" type="number" value="78000" min="0" step="100"/></td>
+            <td class="r td-baki">RM 0.00</td>
+            <td><div class="prog-wrap"><div class="prog-pct">0.0%</div><div class="prog-bar"><div class="prog-fill safe" style="width:0%"></div></div></div></td>
+            <td><span class="badge safe">Selamat</span></td>
+            <td><input class="txt-input" type="text" value="Projek P64 Kod 050180012026"/></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">Jumlah P64</td>
+            <td class="r tf-p">RM 0.00</td><td class="r tf-d">RM 0.00</td>
+            <td class="r tf-b">RM 0.00</td><td colspan="3"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <footer>Dashboard Peruntukan Kewangan Kolej Komuniti Bukit Mertajam — Dibina dengan IBM Bob</footer>
+</div>
+
+<script>
+  // Tarikh hari ini
+  document.getElementById("tarikh-setakat").value = new Date().toISOString().split("T")[0];
+
+  // ══════════════════════════════════════════
+  // CSV — Format:
+  // kod_os,peruntukan,digunakan,perkara
+  // OS 11000,150000,80000,Gaji pokok pensyarah
+  // ══════════════════════════════════════════
+
+  // Kumpul semua baris jadual { kodOS → tr }
+  function getRowMap() {
+    var map = {};
+    document.querySelectorAll("tbody tr").forEach(function(tr) {
+      var kod = tr.querySelector(".os-code");
+      if (kod) map[kod.textContent.trim()] = tr;
+    });
+    return map;
+  }
+
+  // Parse CSV teks → array objek
+  function parseCSV(text) {
+    var lines = text.trim().split(/\r?\n/);
+    var header = lines[0].split(",").map(function(h){ return h.trim().toLowerCase(); });
+    var rows = [];
+    for (var i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      // Sokong nilai dalam petikan
+      var cols = [];
+      var cur = "", inQ = false;
+      for (var c = 0; c < lines[i].length; c++) {
+        var ch = lines[i][c];
+        if (ch === '"') { inQ = !inQ; }
+        else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
+        else { cur += ch; }
+      }
+      cols.push(cur.trim());
+      var obj = {};
+      header.forEach(function(h, idx){ obj[h] = cols[idx] !== undefined ? cols[idx] : ""; });
+      rows.push(obj);
+    }
+    return rows;
+  }
+
+  // Import CSV ke dalam jadual
+  document.getElementById("csv-file-input").addEventListener("change", function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var status = document.getElementById("csv-status");
+      try {
+        var rows = parseCSV(ev.target.result);
+        var rowMap = getRowMap();
+        var count = 0;
+        rows.forEach(function(r) {
+          var kod = (r["kod_os"] || r["kod os"] || "").trim();
+          var tr = rowMap[kod];
+          if (!tr) return;
+          var p = parseFloat((r["peruntukan"] || "0").replace(/[^0-9.]/g, "")) || 0;
+          var d = parseFloat((r["digunakan"] || "0").replace(/[^0-9.]/g, "")) || 0;
+          var perkara = r["perkara"] || r["keterangan"] || "";
+          tr.querySelector(".inp-p").value = p;
+          tr.querySelector(".inp-d").value = d;
+          if (perkara) tr.querySelector(".txt-input").value = perkara;
+          updateRow(tr);
+          updateFoot(tr.closest("table"));
+          count++;
+        });
+        updateSummary();
+        status.style.display = "inline";
+        status.className = "";
+        status.textContent = "✔ " + count + " baris berjaya diimport.";
+      } catch(err) {
+        var status = document.getElementById("csv-status");
+        status.style.display = "inline";
+        status.className = "error";
+        status.textContent = "✖ Ralat membaca CSV: " + err.message;
+      }
+    };
+    reader.readAsText(file, "UTF-8");
+    // Reset supaya fail sama boleh diimport semula
+    e.target.value = "";
+  });
+
+  // Eksport data semasa ke CSV
+  document.getElementById("btn-eksport").addEventListener("click", function() {
+    var lines = ["kod_os,kategori,peruntukan,digunakan,baki,perkara"];
+    document.querySelectorAll("tbody tr").forEach(function(tr) {
+      var kod = tr.querySelector(".os-code") ? tr.querySelector(".os-code").textContent.trim() : "";
+      var kat = tr.querySelectorAll("td")[1] ? tr.querySelectorAll("td")[1].textContent.trim() : "";
+      var p = parseFloat(tr.querySelector(".inp-p").value) || 0;
+      var d = parseFloat(tr.querySelector(".inp-d").value) || 0;
+      var b = p - d;
+      var perkara = tr.querySelector(".txt-input") ? tr.querySelector(".txt-input").value.replace(/"/g,'""') : "";
+      lines.push([kod, '"'+kat+'"', p.toFixed(2), d.toFixed(2), b.toFixed(2), '"'+perkara+'"'].join(","));
+    });
+    var blob = new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "bajet-polycc.csv"; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Muat turun template CSV kosong
+  document.getElementById("btn-template").addEventListener("click", function() {
+    var rowMap = getRowMap();
+    var lines = ["kod_os,peruntukan,digunakan,perkara"];
+    Object.keys(rowMap).forEach(function(kod) {
+      lines.push(kod + ",0,0,");
+    });
+    var blob = new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "template-bajet-polycc.csv"; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+
+  function fmt(n) {
+    return "RM " + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  function getKelas(pct) {
+    if (pct >= 90) return "danger";
+    if (pct >= 70) return "warning";
+    return "safe";
+  }
+  function getLabel(pct) {
+    if (pct >= 90) return "Kritikal";
+    if (pct >= 70) return "Perhatian";
+    return "Selamat";
+  }
+
+  function updateRow(row) {
+    var p = parseFloat(row.querySelector(".inp-p").value) || 0;
+    var d = parseFloat(row.querySelector(".inp-d").value) || 0;
+    var b = p - d;
+    var pct = p > 0 ? Math.min((d / p) * 100, 100) : 0;
+    var kelas = getKelas(pct);
+
+    row.querySelector(".td-baki").textContent = fmt(b);
+    row.querySelector(".prog-pct").textContent = pct.toFixed(1) + "%";
+
+    var fill = row.querySelector(".prog-fill");
+    fill.style.width = pct.toFixed(1) + "%";
+    fill.className = "prog-fill " + kelas;
+
+    var badge = row.querySelector(".badge");
+    badge.textContent = getLabel(pct);
+    badge.className = "badge " + kelas;
+  }
+
+  function updateFoot(table) {
+    var sumP = 0, sumD = 0;
+    table.querySelectorAll("tbody tr").forEach(function(r) {
+      sumP += parseFloat(r.querySelector(".inp-p").value) || 0;
+      sumD += parseFloat(r.querySelector(".inp-d").value) || 0;
+    });
+    table.querySelector(".tf-p").textContent = fmt(sumP);
+    table.querySelector(".tf-d").textContent = fmt(sumD);
+    table.querySelector(".tf-b").textContent = fmt(sumP - sumD);
+  }
+
+  function updateDonut(totalP, totalD) {
+    var circ = 2 * Math.PI * 70; // ~439.82
+    var baki = totalP > totalD ? totalP - totalD : 0;
+    var pct  = totalP > 0 ? Math.min((totalD / totalP) * 100, 100) : 0;
+    var bPct = totalP > 0 ? (baki / totalP) * 100 : 0;
+
+    var digLen  = (pct  / 100) * circ;
+    var bakLen  = (bPct / 100) * circ;
+
+    // Donut: mulakan dari atas (offset = circ/4)
+    var offset = circ / 4;
+
+    var elDig = document.getElementById("donut-diguna");
+    var elBak = document.getElementById("donut-baki");
+
+    elDig.setAttribute("stroke-dasharray", digLen.toFixed(2) + " " + (circ - digLen).toFixed(2));
+    elDig.setAttribute("stroke-dashoffset", offset.toFixed(2));
+
+    // Segmen baki bermula selepas segmen digunakan
+    var bakOffset = offset - digLen;
+    elBak.setAttribute("stroke-dasharray", bakLen.toFixed(2) + " " + (circ - bakLen).toFixed(2));
+    elBak.setAttribute("stroke-dashoffset", bakOffset.toFixed(2));
+
+    // Warna donut ikut peratusan
+    var warna = pct >= 90 ? "#dc2626" : pct >= 70 ? "#d97706" : "#16a34a";
+    elDig.setAttribute("stroke", warna);
+
+    document.getElementById("donut-pct-text").textContent = pct.toFixed(1) + "%";
+
+    // Legend
+    document.getElementById("legend-diguna").textContent    = fmt(totalD) + " (" + pct.toFixed(1) + "%)";
+    document.getElementById("legend-baki").textContent      = fmt(baki)   + " (" + bPct.toFixed(1) + "%)";
+    document.getElementById("legend-peruntukan").textContent = fmt(totalP);
+  }
+
+  function updateSummary() {
+    var totalP = 0, totalD = 0;
+    document.querySelectorAll(".inp-p").forEach(function(i) { totalP += parseFloat(i.value) || 0; });
+    document.querySelectorAll(".inp-d").forEach(function(i) { totalD += parseFloat(i.value) || 0; });
+    var baki = totalP - totalD;
+    var pct = totalP > 0 ? (totalD / totalP) * 100 : 0;
+
+    document.getElementById("sum-peruntukan").textContent = fmt(totalP);
+    document.getElementById("sum-diguna").textContent = fmt(totalD);
+    document.getElementById("sum-baki").textContent = fmt(baki);
+
+    var pctEl = document.getElementById("sum-pct");
+    pctEl.textContent = pct.toFixed(1) + "%";
+    pctEl.className = "scard-value " + (pct >= 90 ? "c-red" : pct >= 70 ? "c-yellow" : "c-green");
+
+    updateDonut(totalP, totalD);
+  }
+
+  document.querySelectorAll(".inp-p, .inp-d").forEach(function(input) {
+    input.addEventListener("input", function() {
+      var row = input.closest("tr");
+      var table = input.closest("table");
+      updateRow(row);
+      updateFoot(table);
+      updateSummary();
+    });
+  });
+
+  // Auto-kira semua baris, footer dan summary semasa page load
+  (function() {
+    document.querySelectorAll("tbody tr").forEach(function(row) {
+      if (row.querySelector(".inp-p") && row.querySelector(".inp-d")) {
+        updateRow(row);
+      }
+    });
+    document.querySelectorAll("table").forEach(function(table) {
+      if (table.querySelector(".inp-p")) {
+        updateFoot(table);
+      }
+    });
+    updateSummary();
+  })();
+</script>
+</body>
+</html>
